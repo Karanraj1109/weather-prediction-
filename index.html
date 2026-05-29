@@ -85,7 +85,7 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 450px; /* Lebar maksimal untuk desktop */
+            max-width: 450px;
             height: 100vh;
             max-height: 900px;
             overflow-y: auto;
@@ -94,9 +94,9 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
         }
-        .app-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .app-container::-webkit-scrollbar { display: none; }
 
         /* === GLASSMORPHISM CARDS === */
         .glass-card {
@@ -273,14 +273,13 @@
 </head>
 <body>
 
-    <div id="bg-effects">
-        </div>
+    <div id="bg-effects"></div>
 
     <div class="app-container">
         
         <div id="loading-overlay" class="overlay">
             <div class="loader" id="spinner"></div>
-            <p id="error-msg" class="hidden">Gagal mengambil data. Periksa koneksi atau API Key.</p>
+            <p id="error-msg" class="hidden">Gagal mengambil data.</p>
         </div>
 
         <div class="header">
@@ -301,7 +300,7 @@
         <div class="main-weather glass-card">
             <i id="ui-main-icon" class="fa-solid fa-cloud weather-icon-large"></i>
             <div class="temperature"><span id="ui-temp">0</span><span>°</span></div>
-            <div class="weather-status" id="ui-desc">Memuat data cuaca...</div>
+            <div class="weather-status" id="ui-desc">Memuat data...</div>
         </div>
 
         <div class="glass-card aqi-container">
@@ -347,26 +346,21 @@
 
         <div class="glass-card">
             <div class="section-title">Prediksi Per Jam</div>
-            <div class="hourly-scroll" id="ui-hourly">
-                </div>
+            <div class="hourly-scroll" id="ui-hourly"></div>
         </div>
 
         <div class="glass-card">
             <div class="section-title">Prediksi 5 Hari</div>
-            <div class="daily-list" id="ui-daily">
-                </div>
+            <div class="daily-list" id="ui-daily"></div>
         </div>
 
     </div>
 
     <script>
-        // ==========================================
-        // KONFIGURASI API (GANTI DENGAN API KEY ANDA)
-        // ==========================================
+        // API KEY MILIK USER SUDAH DIMASUKKAN
         const API_KEY = "265608b53a9ccf6e5dda7dbf7c3f9bd0"; 
         
-        // Menggunakan localStorage untuk mengingat kota terakhir yang dicari
-        // Default menggunakan kota relevan atau Jakarta
+        // Memori kota terakhir (default Medan jika belum ada)
         let currentCity = localStorage.getItem('lastCity') || 'Medan';
 
         // DOM Elements
@@ -411,22 +405,28 @@
 
         // Initialize App
         async function init() {
-            if (API_KEY === "265608b53a9ccf6e5dda7dbf7c3f9bd0") {
-                showError("API_KEY belum dimasukkan.<br>Silakan edit file HTML dan masukkan OpenWeatherMap API Key Anda.");
-                return;
-            }
             await fetchWeatherData(currentCity);
         }
 
-        // Fetch Data from OpenWeatherMap
+        // Fetch Data from OpenWeatherMap (DENGAN ERROR HANDLING BARU)
         async function fetchWeatherData(city) {
             showLoading(true);
             try {
                 // 1. Current Weather
                 const currRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=id`);
-                if (!currRes.ok) throw new Error('Kota tidak ditemukan');
-                const currData = await currRes.json();
+                
+                // Cek status error dengan lebih spesifik
+                if (!currRes.ok) {
+                    if (currRes.status === 401) {
+                        throw new Error('API Key baru saja dibuat dan belum aktif. Mohon tunggu sekitar 15-20 menit.');
+                    } else if (currRes.status === 404) {
+                        throw new Error(`Kota "${city}" tidak ditemukan.`);
+                    } else {
+                        throw new Error('Terjadi kesalahan pada server cuaca.');
+                    }
+                }
 
+                const currData = await currRes.json();
                 const lat = currData.coord.lat;
                 const lon = currData.coord.lon;
 
@@ -452,22 +452,19 @@
 
         // Update UI Elements
         function updateUI(curr, forecast, aqiData) {
-            // Main info
             el.city.innerText = curr.name;
             el.temp.innerText = Math.round(curr.main.temp);
             el.desc.innerText = curr.weather[0].description;
             
-            // Icon handling based on OpenWeatherMap icon codes
             const iconClass = getWeatherIcon(curr.weather[0].icon);
             el.mainIcon.className = `fa-solid ${iconClass} weather-icon-large`;
 
-            // Details
             el.humidity.innerText = `${curr.main.humidity}%`;
-            el.wind.innerText = `${Math.round(curr.wind.speed * 3.6)} km/h`; // m/s to km/h
+            el.wind.innerText = `${Math.round(curr.wind.speed * 3.6)} km/h`;
             el.sunrise.innerText = formatTime(curr.sys.sunrise, curr.timezone);
             el.sunset.innerText = formatTime(curr.sys.sunset, curr.timezone);
 
-            // AQI (1: Good, 2: Fair, 3: Moderate, 4: Poor, 5: Very Poor)
+            // AQI
             const aqi = aqiData.list[0].main.aqi;
             const aqiConfig = getAQIConfig(aqi);
             el.aqiVal.innerText = aqi;
@@ -475,7 +472,7 @@
             el.aqiDesc.style.color = aqiConfig.color;
             el.aqiRing.style.background = `conic-gradient(${aqiConfig.color} ${aqi * 20}%, transparent 0)`;
 
-            // Hourly Forecast (Next 24 hours = 8 data points)
+            // Hourly Forecast
             el.hourly.innerHTML = '';
             const hourlyData = forecast.list.slice(0, 8);
             hourlyData.forEach(item => {
@@ -493,7 +490,7 @@
                 el.hourly.innerHTML += html;
             });
 
-            // Daily Forecast (Filter 1 data per hari, misal jam 12:00)
+            // Daily Forecast
             el.daily.innerHTML = '';
             const dailyData = forecast.list.filter(item => item.dt_txt.includes("12:00:00"));
             const daysArr = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -503,7 +500,7 @@
                 const dayName = daysArr[date.getDay()];
                 const icon = getWeatherIcon(item.weather[0].icon);
                 const tempMax = Math.round(item.main.temp_max);
-                const tempMin = Math.round(item.main.temp_min); // OpenWeather gratis biasanya suhu sama, ini aproksimasi
+                const tempMin = Math.round(item.main.temp_min); 
 
                 const html = `
                     <div class="daily-item">
@@ -515,14 +512,11 @@
                 el.daily.innerHTML += html;
             });
 
-            // Change Background based on weather and time
             updateBackgroundAndEffects(curr.weather[0].icon, curr.weather[0].id);
         }
 
-        // --- Helper Functions ---
-
+        // Helper Functions
         function formatTime(unix, timezoneOffset) {
-            // Konversi ke UTC lalu tambahkan timezone offset lokasi
             const date = new Date((unix + timezoneOffset) * 1000);
             let h = date.getUTCHours().toString().padStart(2, '0');
             let m = date.getUTCMinutes().toString().padStart(2, '0');
@@ -555,21 +549,18 @@
             }
         }
 
-        // --- Dynamic Background & Animations ---
-
+        // Dynamic Background & Animations
         function updateBackgroundAndEffects(icon, id) {
             const body = document.body;
-            el.bgEffects.innerHTML = ''; // Bersihkan efek sebelumnya
+            el.bgEffects.innerHTML = ''; 
             
             const isDay = icon.includes('d');
 
             if (id >= 200 && id < 600) {
-                // Rain / Drizzle / Thunderstorm
                 body.style.background = 'var(--bg-rain)';
                 createRain();
                 createClouds(3, isDay);
             } else if (id === 800) {
-                // Clear
                 if (isDay) {
                     body.style.background = 'var(--bg-clear)';
                 } else {
@@ -577,10 +568,9 @@
                     createStars();
                 }
             } else if (id > 800) {
-                // Clouds
                 body.style.background = 'var(--bg-cloudy)';
                 createClouds(5, isDay);
-                if (!isDay) createStars(20); // Sedikit bintang jika berawan malam
+                if (!isDay) createStars(20); 
             }
         }
 
@@ -606,7 +596,7 @@
                 const width = Math.random() * 150 + 100;
                 cloud.style.width = `${width}px`;
                 cloud.style.height = `${width * 0.4}px`;
-                cloud.style.top = `${Math.random() * 40}vh`; // Awan di bagian atas
+                cloud.style.top = `${Math.random() * 40}vh`; 
                 cloud.style.animationDuration = `${Math.random() * 20 + 20}s`;
                 cloud.style.background = isDay ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)';
                 el.bgEffects.appendChild(cloud);
@@ -625,8 +615,7 @@
             }
         }
 
-        // --- User Actions ---
-
+        // User Actions
         function handleSearch(e) {
             if (e.key === 'Enter') {
                 triggerSearch();
