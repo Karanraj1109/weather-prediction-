@@ -11,16 +11,16 @@
     <style>
         /* === CSS VARIABLES & RESET === */
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.7);
             
             /* Background Gradients */
             --bg-night: linear-gradient(135deg, #0b1021 0%, #1b2845 100%);
             --bg-clear: linear-gradient(135deg, #4A90E2 0%, #87CEEB 100%);
-            --bg-cloudy: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
-            --bg-rain: linear-gradient(135deg, #2b323c 0%, #4a5568 100%);
+            --bg-cloudy: linear-gradient(135deg, #4a5568 0%, #2b323c 100%);
+            --bg-rain: linear-gradient(135deg, #232931 0%, #393e46 100%);
         }
 
         * {
@@ -60,24 +60,24 @@
 
         .cloud {
             position: absolute;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 50px;
-            filter: blur(10px);
-            animation: floatCloud 20s infinite linear;
+            filter: blur(12px);
+            animation: floatCloud 25s infinite linear;
             display: none;
         }
 
         .rain-drop {
             position: absolute;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.4);
             width: 2px;
             height: 15px;
-            animation: fallRain 1s infinite linear;
+            animation: fallRain 0.8s infinite linear;
             display: none;
         }
 
-        @keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 0.8; transform: scale(1.2); } }
-        @keyframes floatCloud { 0% { transform: translateX(-100px); } 100% { transform: translateX(100vw); } }
+        @keyframes twinkle { 0% { opacity: 0.1; } 100% { opacity: 0.7; transform: scale(1.2); } }
+        @keyframes floatCloud { 0% { transform: translateX(-150px); } 100% { transform: translateX(100vw); } }
         @keyframes fallRain { 0% { transform: translateY(-20px); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
 
         /* === APP CONTAINER (Mobile Feel) === */
@@ -90,27 +90,29 @@
             max-height: 900px;
             overflow-y: auto;
             background: transparent;
-            padding: 20px;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             scrollbar-width: none;
+            scroll-behavior: smooth;
         }
         .app-container::-webkit-scrollbar { display: none; }
 
         /* === GLASSMORPHISM CARDS === */
         .glass-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 28px; /* Lebih rounded ala Android */
+            padding: 22px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .glass-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
         /* === HEADER & SEARCH === */
@@ -118,62 +120,87 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 5px;
         }
         .location-info {
             display: flex;
             flex-direction: column;
         }
-        .city-name { font-size: 1.5rem; font-weight: 600; display: flex; align-items: center; gap: 8px;}
-        .real-time { font-size: 0.85rem; color: var(--text-muted); }
+        .city-name { font-size: 1.6rem; font-weight: 600; display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px;}
+        .real-time { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;}
         .icon-btn {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             color: white;
-            width: 45px; height: 45px;
+            width: 48px; height: 48px;
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
+            font-size: 1.1rem;
         }
-        .icon-btn:hover { background: rgba(255,255,255,0.2); }
+        .icon-btn:hover { background: rgba(255,255,255,0.2); transform: rotate(15deg); }
 
         .search-box {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            padding: 15px;
+            border-radius: 24px;
         }
         .search-box input {
             flex: 1;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 12px 20px;
+            background: transparent;
+            border: none;
             color: white;
             outline: none;
-            font-size: 1rem;
+            font-size: 1.05rem;
+            padding-left: 5px;
         }
         .search-box input::placeholder { color: var(--text-muted); }
 
         /* === MAIN WEATHER === */
         .main-weather {
             text-align: center;
-            padding: 30px 0;
+            padding: 35px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .weather-icon-large { font-size: 80px; margin-bottom: 10px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));}
+        .weather-icon-large { 
+            font-size: 85px; 
+            margin-bottom: 15px; 
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
+        }
+        
+        /* FIX UNTUK TEKS SUHU AGAR TIDAK BENTROK */
         .temperature {
-            font-size: 6rem;
-            font-weight: 300;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 10px 0;
+        }
+        #ui-temp {
+            font-size: 6.5rem;
+            font-weight: 400;
             line-height: 1;
-            position: relative;
+            letter-spacing: -2px;
         }
-        .temperature span {
-            font-size: 2rem;
-            position: absolute;
-            top: 15px;
+        .degree {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-top: 5px;
         }
-        .weather-status { font-size: 1.2rem; font-weight: 500; text-transform: capitalize; margin-top: 10px;}
+        
+        /* FIX UNTUK TEKS STATUS CUACA PANJANG */
+        .weather-status { 
+            font-size: 1.25rem; 
+            font-weight: 500; 
+            text-transform: capitalize; 
+            margin-top: 5px;
+            line-height: 1.4;
+            padding: 0 10px;
+            letter-spacing: 0.5px;
+        }
 
         /* === AQI & DETAILS GRID === */
         .details-grid {
@@ -185,66 +212,73 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            padding: 18px;
         }
-        .detail-icon { font-size: 1.5rem; color: var(--text-muted); width: 30px; text-align: center;}
-        .detail-info p { font-size: 0.85rem; color: var(--text-muted); }
-        .detail-info h4 { font-size: 1.1rem; font-weight: 600; }
+        .detail-icon { font-size: 1.6rem; color: var(--text-muted); width: 30px; text-align: center;}
+        .detail-info p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 3px; }
+        .detail-info h4 { font-size: 1.15rem; font-weight: 600; }
 
         /* AQI Circular Progress */
         .aqi-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 22px;
         }
         .aqi-circle {
-            width: 60px; height: 60px;
+            width: 64px; height: 64px;
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             background: conic-gradient(#4caf50 0% 100%);
             position: relative;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
         .aqi-inner {
-            width: 48px; height: 48px;
-            background: rgba(30, 40, 60, 0.8);
+            width: 52px; height: 52px;
+            background: var(--bg-night);
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             font-weight: 700;
+            font-size: 1.1rem;
         }
 
         /* === HORIZONTAL FORECAST (HOURLY) === */
-        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 15px; }
+        .section-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 20px; letter-spacing: 0.5px;}
         .hourly-scroll {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             overflow-x: auto;
             padding-bottom: 10px;
             scrollbar-width: none;
         }
         .hourly-scroll::-webkit-scrollbar { display: none; }
         .hourly-item {
-            min-width: 80px;
+            min-width: 75px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
-        .hourly-item i { font-size: 1.5rem; }
+        .hourly-item i { font-size: 1.6rem; }
 
         /* === DAILY FORECAST === */
         .daily-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 18px;
         }
         .daily-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .daily-item .day { flex: 1; font-weight: 500; }
-        .daily-item .icon { flex: 1; text-align: center; font-size: 1.2rem;}
-        .daily-item .temps { flex: 1; text-align: right; font-weight: 600; }
-        .temps span { color: var(--text-muted); margin-left: 10px; font-weight: 400;}
+        .daily-item:last-child { border-bottom: none; padding-bottom: 0;}
+        .daily-item .day { flex: 1.5; font-weight: 500; font-size: 1.05rem;}
+        .daily-item .icon { flex: 1; text-align: center; font-size: 1.3rem;}
+        .daily-item .temps { flex: 1.5; text-align: right; font-weight: 600; font-size: 1.05rem;}
+        .temps span { color: var(--text-muted); margin-left: 12px; font-weight: 400;}
 
         /* === LOADING & ERROR OVERLAY === */
         .overlay {
@@ -262,13 +296,13 @@
             border: 4px solid var(--glass-border);
             border-top: 4px solid white;
             border-radius: 50%;
-            width: 40px; height: 40px;
+            width: 45px; height: 45px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .hidden { display: none !important; }
         
-        #error-msg { text-align: center; padding: 20px; color: #ff6b6b; font-weight: 500; max-width: 80%;}
+        #error-msg { text-align: center; padding: 20px; color: #ff6b6b; font-weight: 500; max-width: 80%; line-height: 1.5;}
     </style>
 </head>
 <body>
@@ -294,19 +328,23 @@
 
         <div class="search-box glass-card">
             <input type="text" id="search-input" placeholder="Cari kota lain..." onkeypress="handleSearch(event)">
-            <button class="icon-btn" onclick="triggerSearch()" style="border:none; width:45px; height:45px;"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="icon-btn" onclick="triggerSearch()" style="border:none; width:40px; height:40px; background: transparent;"><i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
 
         <div class="main-weather glass-card">
             <i id="ui-main-icon" class="fa-solid fa-cloud weather-icon-large"></i>
-            <div class="temperature"><span id="ui-temp">0</span><span>°</span></div>
+            
+            <div class="temperature">
+                <span id="ui-temp">0</span><span class="degree">°</span>
+            </div>
+            
             <div class="weather-status" id="ui-desc">Memuat data...</div>
         </div>
 
         <div class="glass-card aqi-container">
             <div>
-                <h4 style="font-weight: 500; margin-bottom: 5px;">Kualitas Udara (AQI)</h4>
-                <p id="ui-aqi-desc" style="font-size: 0.9rem; color: var(--text-muted);">Menganalisis...</p>
+                <h4 style="font-weight: 500; margin-bottom: 6px; font-size: 1.05rem;">Kualitas Udara (AQI)</h4>
+                <p id="ui-aqi-desc" style="font-size: 0.95rem; color: var(--text-muted); font-weight: 500;">Menganalisis...</p>
             </div>
             <div class="aqi-circle" id="ui-aqi-ring">
                 <div class="aqi-inner" id="ui-aqi-val">-</div>
@@ -357,7 +395,7 @@
     </div>
 
     <script>
-        // API KEY MILIK USER SUDAH DIMASUKKAN
+        // API KEY MILIK USER 
         const API_KEY = "265608b53a9ccf6e5dda7dbf7c3f9bd0"; 
         
         // Memori kota terakhir (default Medan jika belum ada)
@@ -408,14 +446,13 @@
             await fetchWeatherData(currentCity);
         }
 
-        // Fetch Data from OpenWeatherMap (DENGAN ERROR HANDLING BARU)
+        // Fetch Data from OpenWeatherMap 
         async function fetchWeatherData(city) {
             showLoading(true);
             try {
                 // 1. Current Weather
                 const currRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=id`);
                 
-                // Cek status error dengan lebih spesifik
                 if (!currRes.ok) {
                     if (currRes.status === 401) {
                         throw new Error('API Key baru saja dibuat dan belum aktif. Mohon tunggu sekitar 15-20 menit.');
@@ -470,6 +507,8 @@
             el.aqiVal.innerText = aqi;
             el.aqiDesc.innerText = aqiConfig.text;
             el.aqiDesc.style.color = aqiConfig.color;
+            
+            // Perbaiki background dinamis AQI dengan inner dark sesuai tema
             el.aqiRing.style.background = `conic-gradient(${aqiConfig.color} ${aqi * 20}%, transparent 0)`;
 
             // Hourly Forecast
@@ -482,9 +521,9 @@
                 
                 const html = `
                     <div class="hourly-item">
-                        <span style="font-size: 0.85rem; color: var(--text-muted);">${time}</span>
+                        <span style="font-size: 0.9rem; color: var(--text-muted);">${time}</span>
                         <i class="fa-solid ${icon}"></i>
-                        <span style="font-weight: 600;">${temp}°</span>
+                        <span style="font-weight: 600; font-size: 1.05rem;">${temp}°</span>
                     </div>
                 `;
                 el.hourly.innerHTML += html;
@@ -570,15 +609,15 @@
             } else if (id > 800) {
                 body.style.background = 'var(--bg-cloudy)';
                 createClouds(5, isDay);
-                if (!isDay) createStars(20); 
+                if (!isDay) createStars(15); 
             }
         }
 
-        function createStars(count = 50) {
+        function createStars(count = 40) {
             for (let i = 0; i < count; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
-                const size = Math.random() * 3 + 1;
+                const size = Math.random() * 2.5 + 1;
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
                 star.style.left = `${Math.random() * 100}vw`;
@@ -593,11 +632,11 @@
                 const cloud = document.createElement('div');
                 cloud.className = 'cloud';
                 cloud.style.display = 'block';
-                const width = Math.random() * 150 + 100;
+                const width = Math.random() * 200 + 150;
                 cloud.style.width = `${width}px`;
                 cloud.style.height = `${width * 0.4}px`;
                 cloud.style.top = `${Math.random() * 40}vh`; 
-                cloud.style.animationDuration = `${Math.random() * 20 + 20}s`;
+                cloud.style.animationDuration = `${Math.random() * 20 + 25}s`;
                 cloud.style.background = isDay ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)';
                 el.bgEffects.appendChild(cloud);
             }
@@ -609,7 +648,7 @@
                 drop.className = 'rain-drop';
                 drop.style.display = 'block';
                 drop.style.left = `${Math.random() * 100}vw`;
-                drop.style.animationDuration = `${Math.random() * 0.5 + 0.5}s`;
+                drop.style.animationDuration = `${Math.random() * 0.4 + 0.6}s`;
                 drop.style.animationDelay = `${Math.random()}s`;
                 el.bgEffects.appendChild(drop);
             }
